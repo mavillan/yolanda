@@ -10,9 +10,8 @@ class InventoryDaysPredictor():
     distributions over the time range.
     """
 
-    def __init__(self, train, train_errors):
+    def __init__(self, train):
         self.train = train.copy(deep=True)
-        self.train_errors = train_errors.copy(deep=True)
 
     def fit(self, preds):
         parameters = self.train.groupby('sku').agg({'y':['mean', 'std']}).y
