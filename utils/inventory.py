@@ -54,3 +54,27 @@ class InventoryDaysPredictor():
         #if prob is zero, replace with uniform
         if np.sum(probs) == 0: return np.ones(30) / 30
         return probs/np.sum(probs)
+    
+    
+class IDP():
+    """
+    Class to transform oof predictions into
+    inventory days predictions
+    """
+
+    def __init__(self):
+        pass
+
+    def fit(self, preds):
+        predictors = dict()
+        days = np.arange(1,31)
+        for sku,df in tqdm(preds.groupby("sku")):
+            cumpred = df.y_pred.values.cumsum()
+            interp = interpolate.interp1d(cumpred, days, bounds_error=False, fill_value=(-np.inf,np.inf))
+            predictors[sku] = interp
+        self.predictors = predictors
+
+    def predict(self, sku, stock):
+        idp = float(self.predictors[sku](stock))
+        idp_clip = float(np.clip(idp, a_min=1, a_max=30))
+        return idp,idp_clip
