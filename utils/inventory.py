@@ -46,11 +46,12 @@ class InventoryDaysPredictor():
         std_days = std/mean
         return days_to_stockout,std_days
 
-    def predict_proba(self, sku, stock, dist_kwargs, lambda1, lambda2):
+    def predict_proba(self, sku, stock, lambda1, lambda2, lambda3, lambda4):
         days_to_stockout,std_days = self.predict(sku, stock)
         scale = std_days * (lambda1*(days_to_stockout**lambda2))
+        beta = (lambda3*(days_to_stockout**lambda4))
         days = np.arange(1,31)
-        probs = stats.gennorm.pdf(days, loc=days_to_stockout, scale=scale, **dist_kwargs)
+        probs = stats.gennorm.pdf(days, loc=days_to_stockout, scale=scale, beta=beta)
         #if prob is zero, replace with uniform
         if np.sum(probs) == 0: return np.ones(30) / 30
         return probs/np.sum(probs)
