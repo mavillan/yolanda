@@ -1,17 +1,17 @@
 import numpy as np
 import pandas as pd
+import gc
 
 class Featurador():
 
     def __init__(self, raw):
         self.dataframe = raw.copy()
-        pass
 
     def fit(self, left_limit, right_limit, site=None):
         query_str = "@left_limit <= date <= @right_limit"
         if site is not None:
             query_str += " & site_id == @site"
-        dataframe = self.dataframe.query(query_str).copy()
+        dataframe = self.dataframe.query(query_str).reset_index(drop=True)
         dataframe["tmp"] = dataframe.eval("sold_quantity*minutes_active")
         q_mean = (dataframe.groupby("sku")["tmp"].sum() / dataframe.groupby("sku")["minutes_active"].sum()).reset_index(name="q_mean")
         dataframe = dataframe.merge(q_mean, how="inner", on="sku")
@@ -42,13 +42,15 @@ class Featurador():
             .reset_index(name="q_std_imp")
         )
 
+        del dataframe
+        gc.collect()
+
         self.q_mean = q_mean
         self.q_mean_imp = q_mean_imp
         self.q_std = q_std
         self.q_std_imp = q_std_imp
 
     def transform(self, dataframe):
-        dataframe = dataframe.copy()
         dataframe = dataframe.merge(self.q_mean, how="inner", on="sku")
         dataframe = dataframe.merge(self.q_std, how="inner", on="sku")
 
