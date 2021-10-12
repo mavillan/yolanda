@@ -41,6 +41,10 @@ def discont_loss(probs):
 
 The final loss is `rps_loss(preds, targets) + alpha * discont_loss(preds)` with `alpha=5` (barely tuned).
 
+## Stacking description
+
+![Yolanda-Overview (1)](https://user-images.githubusercontent.com/6305371/136892696-b64fd267-7a90-4ac1-80fc-beaecbdecfab.png)
+
 
 ## Submission generation
 
